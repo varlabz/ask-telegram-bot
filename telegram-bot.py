@@ -7,8 +7,6 @@ from typing import Final, cast
 from ask import AgentASK
 from telegram import Message, Update, constants
 from telegram.ext import Application, MessageHandler, filters, ContextTypes, PrefixHandler
-from dotenv import load_dotenv
-import os
 
 DEFAULT_BOT_CONFIG_FILE: Final[str] = '.bot-config.json'
 
@@ -119,11 +117,6 @@ async def ask(update: Update, _: ContextTypes.DEFAULT_TYPE):
         return
 
     question = update.message.text.strip()
-    for i in {"/ask ", "/вопрос ", "?"}:
-        if update.message.text.startswith(i):
-            question = update.message.text.removeprefix(i).strip()
-            break
-
     if update.message and question:
         print(f">>> {question}", file=sys.stderr)
         response = await agent.run(question)
@@ -152,8 +145,8 @@ def main():
         exit(1)
 
     application = Application.builder().token(token).build()
-    application.add_handler(MessageHandler(filters.TEXT & filters.Regex(r"^\?"), ask))
-    application.add_handler(PrefixHandler("/", {"ask", "вопрос"}, ask))
+    # application.add_handler(MessageHandler(filters.TEXT & filters.Regex(r"^\?"), ask))
+    # application.add_handler(PrefixHandler("/", {"ask", "вопрос"}, ask))
     application.add_handler(PrefixHandler("/", {"start", "stop", "shut-up", "status", "help"}, control))
     # application.add_handler(CommandHandler("ask", ask))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, ask))

@@ -18,8 +18,8 @@ mcp:
   search:
     command: ["uvx", "--from", "git+https://github.com/varlabz/duckduckgo-mcp", "duckduckgo-mcp"]
 
-  markitdown:
-    command: ["uvx", "markitdown-mcp"]
+  fetch:
+    command: ["uvx", "mcp-server-fetch"]
 
   sequential_thinking:
     command: ["npx", "-y", "@modelcontextprotocol/server-sequential-thinking"]

@@ -150,7 +150,7 @@ async def ask(update: Update, _: ContextTypes.DEFAULT_TYPE):
         print(f">>> {question}", file=sys.stderr)
         response = await agent.run(question)
         print(f"<<< {response}", file=sys.stderr)
-        await update.message.reply_text(f"{response}\n\n{str(agent.stat)}", parse_mode=constants.ParseMode.MARKDOWN)
+        await update.message.reply_text(f"{response}\n\n{str(agent.stat)}", )
 
 async def photo(update, _: ContextTypes.DEFAULT_TYPE):
     # Get the largest available photo from the message

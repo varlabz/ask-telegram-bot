@@ -43,8 +43,9 @@ config: BotConfig
 agent: AgentASK | None = None
 agent_reply: Final[AgentASK] = AgentASK.create_from_file(["bot-reply.yaml", "bot-llm.yaml"])
 
-async def _reply(text: str) -> str:
-    return await agent_reply.run(text)
+def _create_agent() -> AgentASK: return AgentASK.create_from_file(["bot.yaml", "bot-llm.yaml"])
+
+async def _reply(text: str) -> str: return await agent_reply.run(text)
 
 def _get_topic_id(message: Message) -> int | None:
     """
@@ -82,12 +83,12 @@ def _get_topic_id(message: Message) -> int | None:
 
     # General topic message (no topic flags)
     return 1
-          
+
 async def control(update: Update, _: ContextTypes.DEFAULT_TYPE):
     global agent
     global config
     if update.message and update.message.text == "/start":
-        agent = AgentASK.create_from_file(["bot.yaml", "bot-llm.yaml"])
+        agent = _create_agent()
         config.chat_id = update.message.chat.id
         config.topic_id = _get_topic_id(update.message)
         config.save()
@@ -117,7 +118,7 @@ async def control(update: Update, _: ContextTypes.DEFAULT_TYPE):
             Используйте /stop, чтобы деактивировать бот.
             Используйте /status, чтобы проверить статус бот.
             Бот отвечает только в теме, где он был активирован.
-        """), parse_mode=constants.ParseMode.MARKDOWN_V2)
+        """), )
 
 async def ask(update: Update, _: ContextTypes.DEFAULT_TYPE):
     if (update.message is None):
@@ -168,6 +169,11 @@ async def photo(update, _: ContextTypes.DEFAULT_TYPE):
 def main():
     """Starts the bot."""
 
+    token = os.environ.get("TELEGRAM_TOKEN")
+    if token is None:
+        print("Error: TELEGRAM_TOKEN not found")
+        exit(1)
+
     parser = argparse.ArgumentParser(add_help=True)
     parser.add_argument(
         "--config",
@@ -178,23 +184,15 @@ def main():
     )
     args = parser.parse_args()
 
-    token = os.environ.get("TELEGRAM_TOKEN")
-    if token is None:
-        print("Error: TELEGRAM_TOKEN not found")
-        exit(1)
-
     global config
     config = BotConfig(args.config_file)
     if config.chat_id is not None:
         print(f"Loaded config: chat_id={config.chat_id}, topic_id={config.topic_id}")
         global agent
-        agent = AgentASK.create_from_file(["bot.yaml", "bot-llm.yaml"])
+        agent = _create_agent()
 
     application = Application.builder().token(token).build()
-    # application.add_handler(MessageHandler(filters.TEXT & filters.Regex(r"^\?"), ask))
-    # application.add_handler(PrefixHandler("/", {"ask", "вопрос"}, ask))
     application.add_handler(PrefixHandler("/", {"start", "stop", "shut-up", "status", "help"}, control))
-    # application.add_handler(CommandHandler("ask", ask))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, ask))
     # application.add_handler(MessageHandler(filters.PHOTO, photo))
     application.run_polling(allowed_updates=Update.ALL_TYPES)

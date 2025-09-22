@@ -9,13 +9,23 @@ A Telegram bot that provides AI-powered answers to questions in a specific chat 
 - Deactivate the bot with `/stop`
 - Responses are generated using an AI agent configured via YAML files
 
-## Getting Started
+## Running with Docker
 
-1. Ensure `uv` is installed.
-2. Install dependencies: `uv sync`
-3. Create `.bot-config.json` and put your Telegram token there
-4. Configure the AI agent by editing `bot.yaml`, `bot-llm.yaml`, and `bot-reply.yaml`
-5. Run the bot: `uv run telegram-bot.py`
+You can run the bot using Docker Compose:
+
+1. Create a `.key` file in the project root with your Telegram token:
+
+   ```
+   TELEGRAM_TOKEN=your_telegram_token_here
+   ```
+
+2. Build and run the bot:
+
+   ```bash
+   docker compose up --build
+   ```
+
+   The bot will start and use a persistent volume for caching and configuration.
 
 ## Usage
 
@@ -27,16 +37,8 @@ A Telegram bot that provides AI-powered answers to questions in a specific chat 
 ## Configuration
 
 - `.bot-config.json`: runtime settings for the bot.
-  - Required: `telegram_token` (your BotFather token)
   - Auto-managed by the bot: `chat_id`, `topic_id`
-  - Example:
-
-    ```json
-    {
-      "telegram_token": "123456789:ABCDEF..."
-    }
-    ```
-
+ 
 - `bot-llm.yaml`: shared LLM settings merged into agents.
   - Keys: `llm.model`, `llm.base_url`
   - Example:
@@ -65,4 +67,8 @@ Install dependencies with:
 uv sync
 ```
 
-Or add new dependencies with `uv add <package>`.
+## Getting Started
+
+- Configure the AI agent by editing `bot.yaml`, `bot-llm.yaml`, and `bot-reply.yaml`
+- Run the bot: `TELEGRAM_TOKEN=your_telegram_token_here uv run telegram-bot.py`
+

@@ -91,24 +91,24 @@ async def control(update: Update, _: ContextTypes.DEFAULT_TYPE):
         config.chat_id = update.message.chat.id
         config.topic_id = _get_topic_id(update.message)
         config.save()
-        await update.message.reply_text(await _reply("Бот активирован и будет отвечать в этой теме."))
+        await update.message.reply_text(await _reply("Бот активирован и будет отвечать в этой теме."),)
   
     if update.message and (update.message.text == "/stop" or update.message.text == "/shut-up"):
         agent = None
         config.chat_id = None
         config.topic_id = None
         config.save()
-        await update.message.reply_text(await _reply("Бот деактивирован и больше не будет отвечать в этой теме."))
+        await update.message.reply_text(await _reply("Бот деактивирован и больше не будет отвечать в этой теме."), )
 
     if update.message and update.message.text == "/status":
         chat_id = config.chat_id
         topic_id = config.topic_id
         if chat_id is None:
-            return await update.message.reply_text(await _reply("Бот не активирован. Используйте /start в нужной теме."))
+            return await update.message.reply_text(await _reply("Бот не активирован. Используйте /start в нужной теме."),)
         if update.message.chat.id == chat_id and _get_topic_id(update.message) == topic_id:
-            return await update.message.reply_text(await _reply("Бот активирован и участвует в теме"))
+            return await update.message.reply_text(await _reply("Бот активирован и участвует в теме"),)
         else:
-            return await update.message.reply_text(await _reply("Бот активирован, но не участвует в этой теме. Используйте /start в нужной теме."))
+            return await update.message.reply_text(await _reply("Бот активирован, но не участвует в этой теме. Используйте /start в нужной теме."),)
 
     if update.message and update.message.text == "/help":
         await update.message.reply_text(dedent("""
@@ -117,7 +117,7 @@ async def control(update: Update, _: ContextTypes.DEFAULT_TYPE):
             Используйте /stop, чтобы деактивировать бот.
             Используйте /status, чтобы проверить статус бот.
             Бот отвечает только в теме, где он был активирован.
-        """))
+        """), parse_mode=constants.ParseMode.MARKDOWN_V2)
 
 async def ask(update: Update, _: ContextTypes.DEFAULT_TYPE):
     if (update.message is None):
@@ -137,12 +137,12 @@ async def ask(update: Update, _: ContextTypes.DEFAULT_TYPE):
         return
 
     if not (update.message.chat.id == chat_id and _get_topic_id(update.message) == topic_id):
-        print("wrong chat or topic", file=sys.stderr)
+        # print("wrong chat or topic", file=sys.stderr)
         return
 
     if not update.message.text:
         print("no text", file=sys.stderr)
-        await update.message.reply_text(await _reply("NO TEXT"))
+        await update.message.reply_text(await _reply("NO TEXT"), )
         return
 
     question = update.message.text.strip()
@@ -150,7 +150,7 @@ async def ask(update: Update, _: ContextTypes.DEFAULT_TYPE):
         print(f">>> {question}", file=sys.stderr)
         response = await agent.run(question)
         print(f"<<< {response}", file=sys.stderr)
-        await update.message.reply_text(f"{response}\n\n{str(agent.stat)}")
+        await update.message.reply_text(f"{response}\n\n{str(agent.stat)}", parse_mode=constants.ParseMode.MARKDOWN)
 
 async def photo(update, _: ContextTypes.DEFAULT_TYPE):
     # Get the largest available photo from the message
@@ -163,7 +163,7 @@ async def photo(update, _: ContextTypes.DEFAULT_TYPE):
     # img = Image.open(BytesIO(image_bytes)) 
     # Now 'img' is a PIL Image object you can work with
     if update.message.photo:
-        await update.message.reply_text("Image received and ignored!") 
+        await update.message.reply_text("Image received and ignored!", ) 
 
 def main():
     """Starts the bot."""

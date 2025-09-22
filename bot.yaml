@@ -15,6 +15,9 @@ mcp:
   youtube:
     command: ["npx", "-y", "https://github.com/varlabz/youtube-mcp", "--mcp"]
       
+  search:
+    command: ["uvx", "--from", "git+https://github.com/varlabz/duckduckgo-mcp", "duckduckgo-mcp"]
+
   markitdown:
     command: ["uvx", "markitdown-mcp"]
 

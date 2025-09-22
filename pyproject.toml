@@ -10,4 +10,4 @@ dependencies = [
 ]
 
 [tool.uv.sources]
-ask = { git = "ssh://git@github.com/varlabz/ask.git" }
+ask = { git = "https://github.com/varlabz/ask.git" }

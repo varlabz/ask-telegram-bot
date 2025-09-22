@@ -1,7 +1,10 @@
 #!/usr/bin/env -S uvx --from git+https://github.com/varlabz/ask ask-run 
 
 import json
+import os
 import sys
+import argparse
+from dataclasses import dataclass, asdict
 from textwrap import dedent
 from typing import Final, cast
 from ask import AgentASK
@@ -10,16 +13,33 @@ from telegram.ext import Application, MessageHandler, filters, ContextTypes, Pre
 
 DEFAULT_BOT_CONFIG_FILE: Final[str] = '.bot-config.json'
 
-def save_config(config, filename=DEFAULT_BOT_CONFIG_FILE) -> None:
-    with open(filename, 'w') as f: json.dump(config, f, indent=4)
+@dataclass
+class BotConfig:
+    chat_id: int | None = None
+    topic_id: int | None = None
+    _filename: str = DEFAULT_BOT_CONFIG_FILE
 
-def load_config(filename=DEFAULT_BOT_CONFIG_FILE) -> dict:
-    try:
-        with open(filename, 'r') as f: return json.load(f)
-    except FileNotFoundError:
-        return {}
+    def __init__(self, filename: str = DEFAULT_BOT_CONFIG_FILE):
+        self._filename = filename
+        self.load()
 
-config = {}
+    def save(self, ) -> None:
+        with open(self._filename, 'w') as f:
+            json.dump({
+                "chat_id": self.chat_id,
+                "topic_id": self.topic_id,
+            }, f, indent=4)
+
+    def load(self, ) -> None:
+        try:
+            with open(self._filename, 'r') as f:
+                data = json.load(f)
+                self.chat_id = data.get("chat_id")
+                self.topic_id = data.get("topic_id")
+        except FileNotFoundError:
+            pass
+
+config: BotConfig
 
 agent = AgentASK.create_from_file(["bot.yaml", "bot-llm.yaml"])
 agent_reply = AgentASK.create_from_file(["bot-reply.yaml", "bot-llm.yaml"])
@@ -66,20 +86,20 @@ def _get_topic_id(message: Message) -> int | None:
           
 async def control(update: Update, _: ContextTypes.DEFAULT_TYPE):
     if update.message and update.message.text == "/start":
-        config["chat_id"] = update.message.chat.id
-        config["topic_id"] = _get_topic_id(update.message)
-        save_config(config)
+        config.chat_id = update.message.chat.id
+        config.topic_id = _get_topic_id(update.message)
+        config.save()
         await update.message.reply_text(await _reply("Бот активирован и будет отвечать в этой теме."))
   
     if update.message and (update.message.text == "/stop" or update.message.text == "/shut-up"):
-        config.pop("chat_id", None)
-        config.pop("topic_id", None)
-        save_config(config)
+        config.chat_id = None
+        config.topic_id = None
+        config.save()
         await update.message.reply_text(await _reply("Бот деактивирован и больше не будет отвечать в этой теме."))
 
     if update.message and update.message.text == "/status":
-        chat_id = config.get("chat_id")
-        topic_id = config.get("topic_id")
+        chat_id = config.chat_id
+        topic_id = config.topic_id
         if chat_id is None:
             return await update.message.reply_text(await _reply("Бот не активирован. Используйте /start в нужной теме."))
         if update.message.chat.id == chat_id and _get_topic_id(update.message) == topic_id:
@@ -101,8 +121,8 @@ async def ask(update: Update, _: ContextTypes.DEFAULT_TYPE):
         print("no message", file=sys.stderr)
         return
 
-    chat_id = config.get("chat_id")
-    topic_id = config.get("topic_id")
+    chat_id = config.chat_id
+    topic_id = config.topic_id
     if chat_id is None:
         print("bot not activated", file=sys.stderr)
         return
@@ -139,8 +159,20 @@ async def photo(update, _: ContextTypes.DEFAULT_TYPE):
 def main():
     """Starts the bot."""
     global config
-    config = load_config()
-    if (token := config.get("telegram_token")) is None:
+
+    parser = argparse.ArgumentParser(add_help=True)
+    parser.add_argument(
+        "--config",
+        "--config-file",
+        dest="config_file",
+        default=DEFAULT_BOT_CONFIG_FILE,
+        help=f"Path to bot config JSON file (default: {DEFAULT_BOT_CONFIG_FILE})",
+    )
+    args = parser.parse_args()
+
+    config = BotConfig(args.config_file)
+    token = os.environ.get("TELEGRAM_TOKEN")
+    if token is None:
         print("Error: TELEGRAM_TOKEN not found")
         exit(1)
 

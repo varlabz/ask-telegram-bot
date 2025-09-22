@@ -1,4 +1,3 @@
 llm:
   model: ollama:qwen3:30b-a3b-instruct-2507-q4_K_M
-  base_url: http://bacook.local:11434/v1/
 

@@ -131,7 +131,7 @@ wheels = [
 [[package]]
 name = "ask"
 version = "0.15.1"
-source = { git = "ssh://git@github.com/varlabz/ask.git#d3cfbb67cd3be3891a9e64107eeb13e4d3920839" }
+source = { git = "https://github.com/varlabz/ask.git#f34d2e1d92ab91412faca85a9318d7c3060f0d29" }
 dependencies = [
     { name = "fastapi" },
     { name = "griffe" },
@@ -1911,7 +1911,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "ask", git = "ssh://git@github.com/varlabz/ask.git" },
+    { name = "ask", git = "https://github.com/varlabz/ask.git" },
     { name = "python-telegram-bot", specifier = ">=22.3" },
 ]
 

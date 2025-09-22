@@ -1,0 +1,16 @@
+name: varlabzbot
+
+services:
+  bot:
+    build:
+      context: .
+      dockerfile: dockerfile
+    env_file:
+      - .key
+    volumes:
+      - cache:/cache
+    restart: unless-stopped
+    network_mode: host
+
+volumes:
+  cache:

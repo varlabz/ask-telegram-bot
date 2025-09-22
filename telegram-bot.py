@@ -114,7 +114,6 @@ async def control(update: Update, _: ContextTypes.DEFAULT_TYPE):
     if update.message and update.message.text == "/help":
         await update.message.reply_text(dedent("""
             Используйте /start в нужной теме, чтобы активировать бот.
-            Задавайте вопросы с префиксом `?` или /ask.
             Используйте /stop, чтобы деактивировать бот.
             Используйте /status, чтобы проверить статус бот.
             Бот отвечает только в теме, где он был активирован.

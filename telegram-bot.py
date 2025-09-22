@@ -1,4 +1,4 @@
-#!/usr/bin/env -S uvx --from git+https://github.com/varlabz/ask ask-run 
+#!/usr/bin/env python3
 
 import json
 import os

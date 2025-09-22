@@ -131,7 +131,7 @@ wheels = [
 [[package]]
 name = "ask"
 version = "0.15.1"
-source = { git = "https://github.com/varlabz/ask.git#f34d2e1d92ab91412faca85a9318d7c3060f0d29" }
+source = { git = "https://github.com/varlabz/ask.git#0da9ba7f84e458426c4c36d9429e3911fad9caac" }
 dependencies = [
     { name = "fastapi" },
     { name = "griffe" },

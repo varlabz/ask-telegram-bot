@@ -1,4 +1,4 @@
-#!/usr/bin/env -S uvx --from git+https://github.com/varlabz/ask ask-cli -c ~/.config/ask/llm-ollama.yaml -c 
+#!/usr/bin/env -S uvx --from git+https://github.com/varlabz/ask ask-cli -c bot-llm.yaml -c 
 
 agent:
   instructions: |

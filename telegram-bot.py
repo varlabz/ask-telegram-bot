@@ -40,9 +40,8 @@ class BotConfig:
             pass
 
 config: BotConfig
-
-agent = AgentASK.create_from_file(["bot.yaml", "bot-llm.yaml"])
-agent_reply = AgentASK.create_from_file(["bot-reply.yaml", "bot-llm.yaml"])
+agent: AgentASK | None = None
+agent_reply: Final[AgentASK] = AgentASK.create_from_file(["bot-reply.yaml", "bot-llm.yaml"])
 
 async def _reply(text: str) -> str:
     return await agent_reply.run(text)
@@ -85,13 +84,17 @@ def _get_topic_id(message: Message) -> int | None:
     return 1
           
 async def control(update: Update, _: ContextTypes.DEFAULT_TYPE):
+    global agent
+    global config
     if update.message and update.message.text == "/start":
+        agent = AgentASK.create_from_file(["bot.yaml", "bot-llm.yaml"])
         config.chat_id = update.message.chat.id
         config.topic_id = _get_topic_id(update.message)
         config.save()
         await update.message.reply_text(await _reply("Бот активирован и будет отвечать в этой теме."))
   
     if update.message and (update.message.text == "/stop" or update.message.text == "/shut-up"):
+        agent = None
         config.chat_id = None
         config.topic_id = None
         config.save()
@@ -121,6 +124,12 @@ async def ask(update: Update, _: ContextTypes.DEFAULT_TYPE):
         print("no message", file=sys.stderr)
         return
 
+    global agent
+    if agent is None:
+        print("bot not active", file=sys.stderr)
+        return
+
+    global config
     chat_id = config.chat_id
     topic_id = config.topic_id
     if chat_id is None:
@@ -128,7 +137,7 @@ async def ask(update: Update, _: ContextTypes.DEFAULT_TYPE):
         return
 
     if not (update.message.chat.id == chat_id and _get_topic_id(update.message) == topic_id):
-        await update.message.reply_text(await _reply("Это не место для дискуссий."))
+        print("wrong chat or topic", file=sys.stderr)
         return
 
     if not update.message.text:
@@ -158,7 +167,6 @@ async def photo(update, _: ContextTypes.DEFAULT_TYPE):
 
 def main():
     """Starts the bot."""
-    global config
 
     parser = argparse.ArgumentParser(add_help=True)
     parser.add_argument(
@@ -170,11 +178,17 @@ def main():
     )
     args = parser.parse_args()
 
-    config = BotConfig(args.config_file)
     token = os.environ.get("TELEGRAM_TOKEN")
     if token is None:
         print("Error: TELEGRAM_TOKEN not found")
         exit(1)
+
+    global config
+    config = BotConfig(args.config_file)
+    if config.chat_id is not None:
+        print(f"Loaded config: chat_id={config.chat_id}, topic_id={config.topic_id}")
+        global agent
+        agent = AgentASK.create_from_file(["bot.yaml", "bot-llm.yaml"])
 
     application = Application.builder().token(token).build()
     # application.add_handler(MessageHandler(filters.TEXT & filters.Regex(r"^\?"), ask))

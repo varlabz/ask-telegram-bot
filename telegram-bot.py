@@ -11,7 +11,7 @@ from ask import AgentASK
 from telegram import Message, Update, constants
 from telegram.constants import ParseMode
 from telegram.ext import Application, MessageHandler, filters, ContextTypes, PrefixHandler
-import mdformat
+from telegramify_markdown import markdownify, telegramify
 
 DEFAULT_BOT_CONFIG_FILE: Final[str] = '.bot-config.json'
 
@@ -151,9 +151,9 @@ async def ask(update: Update, _: ContextTypes.DEFAULT_TYPE):
     if update.message and question:
         print(f">>> {question}", file=sys.stderr)
         response = await agent.run(question)
-        response = mdformat.text(response)  # fix broken markdown
+        response =  markdownify(f"{response}\n\n{agent.stat}")
         print(f"<<< {response}", file=sys.stderr)
-        await update.message.reply_text(f"{response}\n\n{str(agent.stat)}", parse_mode=ParseMode.MARKDOWN_V2)
+        await update.message.reply_text(response, parse_mode=ParseMode.MARKDOWN_V2)
 
 async def photo(update, _: ContextTypes.DEFAULT_TYPE):
     # Get the largest available photo from the message

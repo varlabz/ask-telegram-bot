@@ -20,8 +20,3 @@ mcp:
 
   fetch:
     command: ["uvx", "mcp-server-fetch"]
-
-  sequential_thinking:
-    command: ["npx", "-y", "@modelcontextprotocol/server-sequential-thinking"]
-    env:
-      DISABLE_THOUGHT_LOGGING: "true" 

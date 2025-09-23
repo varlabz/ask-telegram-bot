@@ -151,7 +151,7 @@ async def ask(update: Update, _: ContextTypes.DEFAULT_TYPE):
     if update.message and question:
         print(f">>> {question}", file=sys.stderr)
         response = await agent.run(question)
-        response =  markdownify(f"{response}\n\n{agent.stat}")
+        response = markdownify(f"{response}\n\n{agent.stat}")
         print(f"<<< {response}", file=sys.stderr)
         await update.message.reply_text(response, parse_mode=ParseMode.MARKDOWN_V2)
 
